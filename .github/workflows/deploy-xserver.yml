@@ -1,0 +1,39 @@
+name: Deploy to Xserver
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.XSERVER_SSH_KEY }}" > ~/.ssh/xserver_key
+          chmod 600 ~/.ssh/xserver_key
+          ssh-keyscan -p "${{ secrets.XSERVER_PORT || '10022' }}" "${{ secrets.XSERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Validate deploy path
+        run: |
+          case "${{ secrets.XSERVER_DEPLOY_PATH }}" in
+            *cut-salon.jp*katakana*|*katakana*cut-salon.jp*) ;;
+            *)
+              echo "XSERVER_DEPLOY_PATH must point to the katakana.cut-salon.jp public directory."
+              exit 1
+              ;;
+          esac
+
+      - name: Deploy static files
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/xserver_key -p ${{ secrets.XSERVER_PORT || '10022' }}" \
+            index.html script.js style.css \
+            "${{ secrets.XSERVER_USER }}@${{ secrets.XSERVER_HOST }}:${{ secrets.XSERVER_DEPLOY_PATH }}/"
