@@ -15,15 +15,48 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Prepare SSH key
+        id: deploy-vars
         run: |
+          set -euo pipefail
+          HOST="${{ secrets.XSERVER_HOST }}"
+          PORT="${{ secrets.XSERVER_PORT }}"
+          USER="${{ secrets.XSERVER_USER }}"
+          DEPLOY_PATH="${{ secrets.XSERVER_DEPLOY_PATH }}"
+          KEY="${{ secrets.XSERVER_SSH_KEY }}"
+          if [ -z "$KEY" ]; then
+            KEY="${{ secrets.XSERVER_DEPLOY_KEY }}"
+          fi
+          if [ -z "$HOST" ]; then
+            HOST="sv8759.xserver.jp"
+          fi
+          if [ -z "$PORT" ]; then
+            PORT="10022"
+          fi
+          if [ -z "$USER" ]; then
+            echo "XSERVER_USER secret is required."
+            exit 1
+          fi
+          if [ -z "$DEPLOY_PATH" ]; then
+            DEPLOY_PATH="/home/${USER}/cut-salon.jp/public_html/katakana"
+          fi
+          if [ -z "$KEY" ]; then
+            echo "XSERVER_SSH_KEY or XSERVER_DEPLOY_KEY secret is required."
+            exit 1
+          fi
+          {
+            echo "host=$HOST"
+            echo "port=$PORT"
+            echo "user=$USER"
+            echo "deploy_path=$DEPLOY_PATH"
+          } >> "$GITHUB_OUTPUT"
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.XSERVER_SSH_KEY }}" > ~/.ssh/xserver_key
+          printf '%s\n' "$KEY" > ~/.ssh/xserver_key
           chmod 600 ~/.ssh/xserver_key
-          ssh-keyscan -p "${{ secrets.XSERVER_PORT || '10022' }}" "${{ secrets.XSERVER_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -p "$PORT" "$HOST" >> ~/.ssh/known_hosts
 
       - name: Validate deploy path
         run: |
-          case "${{ secrets.XSERVER_DEPLOY_PATH }}" in
+          case "${{ steps.deploy-vars.outputs.deploy_path }}" in
             *cut-salon.jp*katakana*|*katakana*cut-salon.jp*) ;;
             *)
               echo "XSERVER_DEPLOY_PATH must point to the katakana.cut-salon.jp public directory."
@@ -34,6 +67,6 @@ jobs:
       - name: Deploy static files
         run: |
           rsync -avz --delete \
-            -e "ssh -i ~/.ssh/xserver_key -p ${{ secrets.XSERVER_PORT || '10022' }}" \
+            -e "ssh -i ~/.ssh/xserver_key -p ${{ steps.deploy-vars.outputs.port }}" \
             index.html script.js style.css \
-            "${{ secrets.XSERVER_USER }}@${{ secrets.XSERVER_HOST }}:${{ secrets.XSERVER_DEPLOY_PATH }}/"
+            "${{ steps.deploy-vars.outputs.user }}@${{ steps.deploy-vars.outputs.host }}:${{ steps.deploy-vars.outputs.deploy_path }}/"
