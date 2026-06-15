@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>カタカナスター</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app" aria-labelledby="appTitle">
+      <header class="topbar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M32 5 39.5 23 59 24.7 44.2 37.5 48.7 56.5 32 46.5 15.3 56.5 19.8 37.5 5 24.7 24.5 23Z" />
+            <circle cx="25" cy="29" r="3" />
+            <circle cx="39" cy="29" r="3" />
+            <path d="M23 39c4.7 4.2 13.3 4.2 18 0" />
+          </svg>
+          <div>
+            <h1 id="appTitle">カタカナスター</h1>
+            <p id="stageLabel">ア行の ステージ</p>
+          </div>
+        </div>
+        <div class="scoreboard" aria-live="polite">
+          <div>
+            <span>スター</span>
+            <strong id="starCount">0</strong>
+          </div>
+          <div>
+            <span>れんぞく</span>
+            <strong id="streakCount">0</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="controls" aria-label="ゲームせってい">
+        <div class="mode-tabs" role="tablist" aria-label="モード">
+          <button class="mode-tab active" type="button" data-mode="quiz" role="tab" aria-selected="true">
+            <span aria-hidden="true">?</span>
+            よむ
+          </button>
+          <button class="mode-tab" type="button" data-mode="trace" role="tab" aria-selected="false">
+            <span aria-hidden="true">✎</span>
+            かく
+          </button>
+        </div>
+        <div class="row-picker" id="rowPicker" aria-label="カタカナの行"></div>
+      </section>
+
+      <section class="play-area">
+        <section class="stage" aria-live="polite">
+          <div class="mascot-wrap" aria-hidden="true">
+            <svg class="mascot" viewBox="0 0 200 170">
+              <path class="ship-window" d="M116 15c19 10 31 29 31 51 0 32-26 58-58 58S31 98 31 66c0-22 12-41 31-51 14 10 40 10 54 0Z" />
+              <path class="ship" d="M88 43c44 0 72 31 72 65 0 12-4 24-11 34H27c-7-10-11-22-11-34 0-34 28-65 72-65Z" />
+              <path class="wing left" d="M36 104 5 132c19 6 36 4 51-8Z" />
+              <path class="wing right" d="M140 104 171 132c-19 6-36 4-51-8Z" />
+              <circle class="face" cx="88" cy="80" r="37" />
+              <circle cx="75" cy="77" r="5" />
+              <circle cx="101" cy="77" r="5" />
+              <path class="smile" d="M74 94c8 8 20 8 28 0" />
+              <path class="spark s1" d="M168 40 173 52 185 57 173 62 168 74 163 62 151 57 163 52Z" />
+              <path class="spark s2" d="M25 17 29 26 38 30 29 34 25 43 21 34 12 30 21 26Z" />
+            </svg>
+          </div>
+
+          <div class="prompt-zone">
+            <div class="picture" id="picture" aria-hidden="true">🍦</div>
+            <div class="prompt-copy">
+              <p class="small-label" id="smallLabel">よんでみよう</p>
+              <h2 id="promptText">アイス の「ア」</h2>
+              <p id="hintText">おなじ カタカナを えらぼう</p>
+            </div>
+            <button class="sound-button" id="soundButton" type="button" aria-label="おとをきく">
+              <span aria-hidden="true">▶</span>
+            </button>
+          </div>
+
+          <div class="quiz-panel" id="quizPanel">
+            <div class="choice-grid" id="choiceGrid" aria-label="こたえ"></div>
+          </div>
+
+          <div class="trace-panel hidden" id="tracePanel">
+            <div class="trace-board" id="traceBoard">
+              <div class="trace-letter" id="traceLetter">ア</div>
+              <svg class="stroke-guide" id="strokeGuide" viewBox="0 0 100 80" aria-hidden="true"></svg>
+              <canvas id="traceCanvas" aria-label="カタカナをなぞる"></canvas>
+            </div>
+            <div class="trace-actions">
+              <button class="tool-button" id="clearTrace" type="button">
+                <span aria-hidden="true">↺</span>
+                けす
+              </button>
+              <button class="tool-button primary" id="doneTrace" type="button">
+                <span aria-hidden="true">★</span>
+                できた
+              </button>
+            </div>
+          </div>
+
+          <div class="feedback" id="feedback" aria-live="polite"></div>
+        </section>
+
+        <aside class="kana-map" aria-label="カタカナずかん">
+          <div class="map-heading">
+            <h2>カタカナずかん</h2>
+            <button class="mini-button" id="resetButton" type="button" aria-label="スターをリセット">↺</button>
+          </div>
+          <div class="kana-grid" id="kanaGrid"></div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
